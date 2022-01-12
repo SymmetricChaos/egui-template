@@ -1,23 +1,15 @@
 use eframe::{egui, epi};
+use num::{BigUint, Integer};
 
-pub fn gcd_fn(a: u64, b: u64) -> u64 {
-    let mut a = a;
-    let mut b = b;
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
+
 
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 //#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
 //#[cfg_attr(feature = "persistence", serde(default))] // if we add new fields, give them default values when deserializing old state
 pub struct TemplateApp {
-    a: u64,
-    b: u64,
+    a: u32,
+    b: u32,
 }
 
 impl Default for TemplateApp {
@@ -62,41 +54,66 @@ impl epi::App for TemplateApp {
                     }
                 });
             });
+            egui::warn_if_debug_build(ui);
         });
 
         egui::SidePanel::left("side_panel").show(ctx, |ui| {
             ui.heading("Panel");
 
+            // Control a and b
             ui.horizontal(|ui| {
                 ui.label("a = ");
                 ui.add(egui::DragValue::new(a).speed(1.0));
+                if ui.small_button("-").clicked() {
+                    *a = a.saturating_sub(1);
+                }
+                if ui.small_button("+").clicked() {
+                    *a = a.saturating_add(1);
+                }
             });
 
             ui.horizontal(|ui| {
                 ui.label("b = ");
                 ui.add(egui::DragValue::new(b).speed(1.0));
+                if ui.small_button("-").clicked() {
+                    *b = b.saturating_sub(1);
+                }
+                if ui.small_button("+").clicked() {
+                    *b = b.saturating_add(1);
+                }
             });
 
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
             // The central panel the region left after adding TopPanel's and SidePanel's
+            let big_a = BigUint::from(*a);
+            let big_b = BigUint::from(*b);
+
+            let (gcd, lcm) = big_a.gcd_lcm(&big_b);
+            let pow = big_a.pow(*b);
+            let (quo, rem) = big_a.div_rem(&big_b);
 
             ui.horizontal(|ui| {
-                ui.label("gcd(a,b) = ");
-                ui.label(gcd_fn(*a,*b).to_string());
+                ui.label("gcd(a,b) =");
+                ui.label(gcd.to_string());
             });
 
             ui.horizontal(|ui| {
-                ui.label("a + b = ");
-                ui.label((*a+*b).to_string());
+                ui.label("lcm(a,b) =");
+                ui.label(lcm.to_string());
             });
 
             ui.horizontal(|ui| {
-                ui.label("a * b = ");
-                ui.label((*a**b).to_string());
+                ui.label("a^b =");
+                ui.label(pow.to_string());
             });
-            egui::warn_if_debug_build(ui);
+
+            ui.horizontal(|ui| {
+                ui.label("a / b =");
+                ui.label(format!("{} r{}", quo, rem));
+            });
+
         });
 
     }

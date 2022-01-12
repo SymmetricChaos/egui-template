@@ -5,6 +5,7 @@
 mod app;
 pub use app::TemplateApp;
 
+
 // ----------------------------------------------------------------------------
 // When compiling for web:
 
