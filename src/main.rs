@@ -2,11 +2,13 @@
 #![cfg_attr(not(debug_assertions), deny(warnings))] // Forbid warnings in release builds
 #![warn(clippy::all, rust_2018_idioms)]
 
+mod app;
+pub use app::TNTApp;
 
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
-    let app = eframe_template::TemplateApp::default();
+    let app = app::TNTApp::default();
     let native_options = eframe::NativeOptions::default();
     eframe::run_native(Box::new(app), native_options);
 }
